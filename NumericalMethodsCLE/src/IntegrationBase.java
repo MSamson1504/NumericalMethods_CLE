@@ -4,17 +4,27 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public abstract class IntegrationBase extends JDialog {
-    protected JTextField txtA, txtB, txtN;
+    protected JTextField txtA, txtB, txtN, txtFunction;
     protected JTable table;
     protected DefaultTableModel tableModel;
+    protected ExpressionEvaluator evaluator;
 
     public IntegrationBase(JFrame parent, String title) {
         super(parent, title, true);
         setLayout(new BorderLayout(10, 10));
         ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setSize(700, 550);
+        setSize(750, 550);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        evaluator = new ExpressionEvaluator();
+    }
+
+    protected void addFunctionField() {
+        txtFunction = new JTextField("x^2", 20);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.add(new JLabel("f(x) ="));
+        panel.add(txtFunction);
+        add(panel, BorderLayout.NORTH);
     }
 
     protected void addInputPanel() {
@@ -28,7 +38,7 @@ public abstract class IntegrationBase extends JDialog {
         panel.add(txtB);
         panel.add(new JLabel("Number of subintervals:"));
         panel.add(txtN);
-        add(panel, BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
     }
 
     protected void addTable(String[] columns) {
@@ -40,7 +50,7 @@ public abstract class IntegrationBase extends JDialog {
         table.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(new TitledBorder("Subinterval Data"));
-        add(scroll, BorderLayout.CENTER);
+        add(scroll, BorderLayout.SOUTH);
     }
 
     protected void addCalculateButton() {
@@ -51,10 +61,12 @@ public abstract class IntegrationBase extends JDialog {
         calc.addActionListener(this::doCalculation);
         JPanel btnPanel = new JPanel();
         btnPanel.add(calc);
-        add(btnPanel, BorderLayout.SOUTH);
+        add(btnPanel, BorderLayout.EAST);
     }
 
-    protected double f(double x) { return x * x; } // example: x^2
+    protected double eval(double x) {
+        return evaluator.evaluate(txtFunction.getText(), x);
+    }
 
     protected abstract void doCalculation(java.awt.event.ActionEvent e);
 }

@@ -1,18 +1,24 @@
 import javax.swing.*;
 
+
+
 public class NewtonDialog extends RootFinderBase {
     public NewtonDialog(JFrame parent) {
         super(parent, "Newton-Raphson Method");
-        txtInitial = new JTextField("1.5");
+        addFunctionField();
+        txtInitial = new JTextField("0.5");
         txtTol = new JTextField("1e-6");
         addInputPanel(new JLabel("Initial guess:"), txtInitial,
                 new JLabel("Tolerance:"), txtTol);
-        addTable(new String[]{"Iteration", "x", "f(x)", "f'(x)", "x_new", "Error"});
+        addTable(new String[]{"Iteration", "x", "f(x)", "f'(x) (approx)", "x_new", "Error |x_new-x|"});
         addCalculateButton();
         setVisible(true);
     }
 
-    private double df(double x) { return 2 * x; }
+    // Numerical derivative using central difference
+    private double derivative(double x, double h) {
+        return (eval(x + h) - eval(x - h)) / (2 * h);
+    }
 
     @Override
     protected void doCalculation(java.awt.event.ActionEvent e) {
@@ -22,8 +28,9 @@ public class NewtonDialog extends RootFinderBase {
             double tol = Double.parseDouble(txtTol.getText());
             int iter = 0;
             for (; iter < 100; iter++) {
-                double fx = f(x);
-                double dfx = df(x);
+                double fx = eval(x);
+                double h = Math.max(Math.abs(x) * 1e-8, 1e-8);
+                double dfx = derivative(x, h);
                 if (Math.abs(dfx) < 1e-12) throw new ArithmeticException("Derivative near zero");
                 double xnew = x - fx / dfx;
                 addRow(iter + 1, String.format("%.6f", x), String.format("%.6e", fx),

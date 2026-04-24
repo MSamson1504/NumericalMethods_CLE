@@ -4,18 +4,20 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public abstract class RootFinderBase extends JDialog {
-    protected JTextField txtA, txtB, txtInitial, txtTol;
+    protected JTextField txtA, txtB, txtInitial, txtTol, txtFunction;
     protected JTable table;
     protected DefaultTableModel tableModel;
     protected JButton calcBtn;
+    protected ExpressionEvaluator evaluator;
 
     public RootFinderBase(JFrame parent, String title) {
         super(parent, title, true);
         setLayout(new BorderLayout(10, 10));
         ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setSize(700, 550);
+        setSize(800, 600);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        evaluator = new ExpressionEvaluator();
     }
 
     protected void addInputPanel(Component... comps) {
@@ -24,10 +26,14 @@ public abstract class RootFinderBase extends JDialog {
         add(panel, BorderLayout.NORTH);
     }
 
+    protected void addFunctionField() {
+        txtFunction = new JTextField("sqrt(x)-cos(x)", 20);
+        addInputPanel(new JLabel("f(x) ="), txtFunction);
+    }
+
     protected void addTable(String[] columns) {
         tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            @Override public boolean isCellEditable(int row, int col) { return false; }
         };
         table = new JTable(tableModel);
         table.setRowHeight(25);
@@ -51,10 +57,11 @@ public abstract class RootFinderBase extends JDialog {
         add(btnPanel, BorderLayout.SOUTH);
     }
 
+    protected double eval(double x) {
+        return evaluator.evaluate(txtFunction.getText(), x);
+    }
+
     protected abstract void doCalculation(java.awt.event.ActionEvent e);
-
-    protected double f(double x) { return x * x - 2; } // example function
-
     protected void clearTable() { tableModel.setRowCount(0); }
     protected void addRow(Object... row) { tableModel.addRow(row); }
 }
